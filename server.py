@@ -33,6 +33,7 @@ def match_ip(name, ip):
 
 def check_request(req, addr):
 	#Can be register name, poll name, pub name ch_id, sub name ch_id
+	#publish name ch_id message(1024)
 	#Check request format
 	#Check ids lowercase
 	#Match IP
@@ -41,7 +42,7 @@ def check_request(req, addr):
 
 def client_thread(conn, addr):
 	conn.send('Welcome to Pub/Sub\n')
-	request = conn.recv(1024)
+	request = conn.recv(2048)
 	print 'Request ' + request + ' from ' + addr[0]
 
 while 1:
