@@ -44,8 +44,31 @@ def update_user(name):
 	#If any subscription is behind, send it
 	if name in user_socket:
 		conn = user_socket[name]
-		#TODO
-	return 1
+		u = User.get(User.username == name)
+		for subscription in ChannelSubscriber.select().where(ChannelSubscriber.sub_id == u):
+			c = subscription.ch_id
+			ts = subscription.ts
+			if c.num > ts:
+				#Send feed with sid = ts
+				f = Feed.get(Feed.ch_id == c, Feed.sid == ts)
+				try:
+					conn.sendall('Feed\nChannel:'+c.name+'\nPublisher:'+f.pub_id.username+'\ntext:'+f.text+'\n')
+					resp = conn.recv(1024)
+					resp = resp.rstrip()
+					if(resp == 'Success'):
+						subscription.ts = subscription.ts+1
+						subscription.save()
+						conn.close()
+						user_socket.pop(name, None)
+						return 1
+					else:
+						conn.close()
+						user_socket.pop(name, None)
+						return 2
+				except socket.error, e:
+					user_socket.pop(name, None)
+					return 2
+	return 0
 
 def process_request(req, ip):
 	#Can be reg name, poll name, pub name ch_id, sub name ch_id
@@ -153,9 +176,9 @@ def process_request(req, ip):
 					Feed.create(ch_id = c, pub_id = u, text = text, sid = c.num)
 					c.num = c.num+1
 					c.save()
+					conn.sendall('Published!')
 					for subscriber in ChannelSubscriber.select().where(ChannelSubscriber.ch_id == c):
 						update_user(subscriber.sub_id.username)
-					conn.sendall('Published!')
 					conn.close()
 				except ChannelPublisher.DoesNotExist:
 					return 'User cannot publish to this channel'
