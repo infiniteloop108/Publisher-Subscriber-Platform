@@ -123,7 +123,17 @@ def process_request(req, ip):
 		elif r == 'ch':
 			a=1
 		elif r == 'unsub':
-			a=1
+			try:
+				c = Channel.get(Channel.name == ch_id)
+				try:
+					subscription = ChannelSubscriber.get(ChannelSubscriber.ch_id == c, ChannelSubscriber.sub_id == u)
+					subscription.delete_instance()
+					conn.sendall('Subscription removed')
+					conn.close()
+				except ChannelSubscriber.DoesNotExist:
+					return 'User not subscribed'
+			except Channel.DoesNotExist:
+				return 'Channel does not exist'
 		elif r == 'publish':
 			a=1
 		elif r == 'poll':
