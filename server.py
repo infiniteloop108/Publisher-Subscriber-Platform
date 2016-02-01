@@ -36,12 +36,9 @@ def check_id(name):
 			return 0
 	return 1
 
-def match_ip(name, ip):
-	return 1
-
 def process_request(req, ip):
 	#Can be reg name, poll name, pub name ch_id, sub name ch_id
-	#unsub name, ch_id publish name ch_id message(1024), ch name ip
+	#unsub name ch_id, publish name ch_id message(1024), ch name ip
 	ind = req.find(' ')
 	if ind == -1:
 		return 'Invalid Format'
@@ -92,7 +89,6 @@ def process_request(req, ip):
 		u = User.get(User.username == name)
 		if u.ip != ip:
 			return 'Access the system from the IP you registered'
-
 		if r == 'pub':
 			try:
 				c = Channel.get(Channel.name == ch_id)
@@ -142,10 +138,8 @@ def process_request(req, ip):
 			a=1
 		elif r == 'poll':
 			a=1
-
 	except User.DoesNotExist:
 		return 'Username does not exist'
-
 	return ''
 
 def client_thread(conn, addr):
