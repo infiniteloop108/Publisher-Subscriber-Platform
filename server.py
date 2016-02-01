@@ -20,8 +20,9 @@ s.listen(10)
 print 'Socket listening on ' + HOST + ':' + str(PORT)
 
 def quitting_server(signal, frame):
-	print 'Closing the server'
+	print 'Closing the server (socket and database)'
 	s.close()
+	db.close()
 	sys.exit(0)
 
 signal.signal(signal.SIGINT, quitting_server)
@@ -38,13 +39,13 @@ def check_id(name):
 def match_ip(name, ip):
 	return 1
 
-def process_request(req, addr):
+def process_request(req, ip):
 	#Can be reg name, poll name, pub name ch_id, sub name ch_id
-	#publish name ch_id message(1024)
+	#unsub name, ch_id publish name ch_id message(1024)
 	#Check request format
 	#Check ids lowercase
 	#Match IP
-	#Return parsed request
+	#Process request
 	ind = req.find(' ')
 	if ind == -1:
 		return 'Invalid Format'
@@ -53,7 +54,7 @@ def process_request(req, addr):
 	name = ''
 	ch_id = ''
 	text = ''
-	if r != "reg" and r!="poll" and r!="pub" and r!="sub" and r!= "publish":
+	if r != "reg" and r!="poll" and r!="pub" and r!="sub" and r!= "publish" and r!="unsub":
 		return 'Invalid request'
 	
 	if r == "reg" or r == "poll":
@@ -77,6 +78,20 @@ def process_request(req, addr):
 	if check_id(name) == 0:
 		return 'Name should have small letters only'
 	
+	if r == 'reg':
+		#Check if user already exists
+		try:
+			u = User.get(User.username == name)
+			return 'User already exists'
+		except User.DoesNotExist:
+			u = User.create(username = name, ip = ip)
+			u.save()
+			conn.sendall('Successfully Registered')
+			conn.close()
+			return ''
+	
+
+
 
 	return ''
 
@@ -85,7 +100,7 @@ def client_thread(conn, addr):
 	req = conn.recv(2048)
 	req = req.rstrip()
 	print 'Request ' + req + ' from ' + addr[0]
-	err = process_request(req, addr)
+	err = process_request(req, addr[0])
 	if err == '' :
 		print 'Request ' + req + ' processed'
 	else:
