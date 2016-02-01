@@ -27,6 +27,7 @@ def quitting_server(signal, frame):
 
 signal.signal(signal.SIGINT, quitting_server)
 
+
 def check_id(name):
 	l = len(name)
 	if l == 0:
@@ -34,6 +35,16 @@ def check_id(name):
 	for i in range(l):
 		if (not ((name[i] >= 'a' and name[i] <= 'z') or (name[i] >= '0' and name[i] <= '9'))):
 			return 0
+	return 1
+
+user_socket = {}
+
+def update_user(name):
+	#Look at all the subscriptions of user with username=name
+	#If any subscription is behind, send it
+	if name in user_socket:
+		conn = user_socket[name]
+		#TODO
 	return 1
 
 def process_request(req, ip):
@@ -135,9 +146,26 @@ def process_request(req, ip):
 			except Channel.DoesNotExist:
 				return 'Channel does not exist'
 		elif r == 'publish':
-			a=1
+			try:
+				c = Channel.get(Channel.name == ch_id)
+				try:
+					publisher = ChannelPublisher.get(ChannelPublisher.ch_id == c, ChannelPublisher.pub_id == u)
+					Feed.create(ch_id = c, pub_id = u, text = text, sid = c.num)
+					c.num = c.num+1
+					c.save()
+					for subscriber in ChannelSubscriber.select().where(ChannelSubscriber.ch_id == c):
+						update_user(subscriber.sub_id.username)
+					conn.sendall('Published!')
+					conn.close()
+				except ChannelPublisher.DoesNotExist:
+					return 'User cannot publish to this channel'
+					conn.sendall('Publisher added')
+					conn.close()
+			except Channel.DoesNotExist:
+				return 'Channel does not exist'
 		elif r == 'poll':
-			a=1
+			user_socket[name] = conn
+			update_user(name)
 	except User.DoesNotExist:
 		return 'Username does not exist'
 	return ''
