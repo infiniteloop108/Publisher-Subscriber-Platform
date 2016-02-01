@@ -41,11 +41,7 @@ def match_ip(name, ip):
 
 def process_request(req, ip):
 	#Can be reg name, poll name, pub name ch_id, sub name ch_id
-	#unsub name, ch_id publish name ch_id message(1024)
-	#Check request format
-	#Check ids lowercase
-	#Match IP
-	#Process request
+	#unsub name, ch_id publish name ch_id message(1024), ch name ip
 	ind = req.find(' ')
 	if ind == -1:
 		return 'Invalid Format'
@@ -53,8 +49,9 @@ def process_request(req, ip):
 	req = req[ind+1:]
 	name = ''
 	ch_id = ''
+	new_ip = ''
 	text = ''
-	if r != "reg" and r!="poll" and r!="pub" and r!="sub" and r!= "publish" and r!="unsub":
+	if r!= "ch" and r != "reg" and r!="poll" and r!="pub" and r!="sub" and r!= "publish" and r!="unsub":
 		return 'Invalid request'
 	
 	if r == "reg" or r == "poll":
@@ -66,6 +63,7 @@ def process_request(req, ip):
 		name = req[:ind]
 		req = req[ind+1:]
 		ch_id = req
+		new_ip = req
 		if r == "publish":
 			ind = req.find(' ')
 			if ind == -1:
@@ -90,9 +88,27 @@ def process_request(req, ip):
 			conn.close()
 			return ''
 	
+	try:
+		 u = User.get(User.username == name)
+		 if u.ip != ip:
+			 return 'Access the system from the IP you registered'
 
+		 if r == 'pub':
+			 a=1
+		 else if r == 'sub':
+			 a=1
+		 else if r == 'ch':
+			 a=1
+		 else if r == 'unsub':
+			 a=1
+		 else if r == 'publish':
+			 a=1
+		 else if r == 'poll':
+			 a=1
 
-
+	except User.DoesNotExist:
+		return 'Username does not exist'
+	
 	return ''
 
 def client_thread(conn, addr):
