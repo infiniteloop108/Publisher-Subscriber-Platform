@@ -32,7 +32,7 @@ def check_id(name):
 	if l == 0:
 		return 0
 	for i in range(l):
-		if name[i] < 'a' or name[i] > 'z':
+		if (not ((name[i] >= 'a' and name[i] <= 'z') or (name[i] >= '0' and name[i] <= '9'))):
 			return 0
 	return 1
 
@@ -71,10 +71,10 @@ def process_request(req, ip):
 			ch_id = req[:ind]
 			text = req[ind+1:]
 		if check_id(ch_id)==0:
-			return 'Channel ID should have small letters only'
+			return 'Channel ID should have small letters/numbers only'
 	
 	if check_id(name) == 0:
-		return 'Name should have small letters only'
+		return 'Name should have small letters/numbers only'
 	
 	if r == 'reg':
 		#Check if user already exists
@@ -95,15 +95,15 @@ def process_request(req, ip):
 
 		 if r == 'pub':
 			 a=1
-		 else if r == 'sub':
+		 elif r == 'sub':
 			 a=1
-		 else if r == 'ch':
+		 elif r == 'ch':
 			 a=1
-		 else if r == 'unsub':
+		 elif r == 'unsub':
 			 a=1
-		 else if r == 'publish':
+		 elif r == 'publish':
 			 a=1
-		 else if r == 'poll':
+		 elif r == 'poll':
 			 a=1
 
 	except User.DoesNotExist:
