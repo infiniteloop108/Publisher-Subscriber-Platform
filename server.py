@@ -70,8 +70,9 @@ def process_request(req, ip):
 				return 'Wrong Format'
 			ch_id = req[:ind]
 			text = req[ind+1:]
-		if check_id(ch_id)==0:
-			return 'Channel ID should have small letters/numbers only'
+		if r != 'ch':
+			if check_id(ch_id)==0:
+				return 'Channel ID should have small letters/numbers only'
 
 	if check_id(name) == 0:
 		return 'Name should have small letters/numbers only'
@@ -121,7 +122,10 @@ def process_request(req, ip):
 			except Channel.DoesNotExist:
 				return 'Channel does not exist'
 		elif r == 'ch':
-			a=1
+			u.ip = new_ip
+			u.save()
+			conn.sendall('IP changed')
+			conn.close()
 		elif r == 'unsub':
 			try:
 				c = Channel.get(Channel.name == ch_id)
