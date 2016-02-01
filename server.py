@@ -53,7 +53,7 @@ def process_request(req, ip):
 	text = ''
 	if r!= "ch" and r != "reg" and r!="poll" and r!="pub" and r!="sub" and r!= "publish" and r!="unsub":
 		return 'Invalid request'
-	
+
 	if r == "reg" or r == "poll":
 		name = req
 	else:
@@ -72,10 +72,10 @@ def process_request(req, ip):
 			text = req[ind+1:]
 		if check_id(ch_id)==0:
 			return 'Channel ID should have small letters/numbers only'
-	
+
 	if check_id(name) == 0:
 		return 'Name should have small letters/numbers only'
-	
+
 	if r == 'reg':
 		#Check if user already exists
 		try:
@@ -83,32 +83,55 @@ def process_request(req, ip):
 			return 'User already exists'
 		except User.DoesNotExist:
 			u = User.create(username = name, ip = ip)
-			u.save()
 			conn.sendall('Successfully Registered')
 			conn.close()
 			return ''
-	
-	try:
-		 u = User.get(User.username == name)
-		 if u.ip != ip:
-			 return 'Access the system from the IP you registered'
 
-		 if r == 'pub':
-			 a=1
-		 elif r == 'sub':
-			 a=1
-		 elif r == 'ch':
-			 a=1
-		 elif r == 'unsub':
-			 a=1
-		 elif r == 'publish':
-			 a=1
-		 elif r == 'poll':
-			 a=1
+	try:
+		u = User.get(User.username == name)
+		if u.ip != ip:
+			return 'Access the system from the IP you registered'
+
+		if r == 'pub':
+			try:
+				c = Channel.get(Channel.name == ch_id)
+			except Channel.DoesNotExist:
+				#Create a new channel
+				Channel.create(name = ch_id)
+				c = Channel.get(Channel.name == ch_id)
+			finally:
+				try:
+					publisher = ChannelPublisher.get(ChannelPublisher.ch_id == c, ChannelPublisher.pub_id == u)
+					return 'Already publishing'
+				except ChannelPublisher.DoesNotExist:
+					ChannelPublisher.create(ch_id = c, pub_id = u)
+					conn.sendall('Publisher added')
+					conn.close()
+		elif r == 'sub':
+			try:
+				c = Channel.get(Channel.name == ch_id)
+				try:
+					subscription = ChannelSubscriber.get(ChannelSubscriber.ch_id == c, ChannelSubscriber.sub_id == u)
+					return 'User already subscribed'
+				except ChannelSubscriber.DoesNotExist:
+					#Add this user as a subscriber
+					ChannelSubscriber.create(ch_id = c, sub_id = u, ts = c.num)
+					conn.sendall('Subscription added')
+					conn.close()
+			except Channel.DoesNotExist:
+				return 'Channel does not exist'
+		elif r == 'ch':
+			a=1
+		elif r == 'unsub':
+			a=1
+		elif r == 'publish':
+			a=1
+		elif r == 'poll':
+			a=1
 
 	except User.DoesNotExist:
 		return 'Username does not exist'
-	
+
 	return ''
 
 def client_thread(conn, addr):
