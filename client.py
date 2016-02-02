@@ -27,7 +27,7 @@ if resp != 'Successfully Registered':
 s.close()
 
 def process_message(text):
-	print '--------------------'
+	print '\n--------------------'
 	print '\033[94m' + 'You have an update!' + '\033[0m'
 	print '--------------------'
 	print text
@@ -40,7 +40,8 @@ def long_polling():
 	resp = sock.recv(2048)
 	sock.send('Success')
 	sock.close()
-	process_message(resp)
+	if resp != '':
+		process_message(resp)
 	long_polling()
 
 start_new_thread(long_polling, ())
@@ -63,7 +64,26 @@ def print_help():
 print_help()
 
 def publish():
-	a=1
+	ch = raw_input('Enter Channel Name: ')
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	s.connect((HOST, PORT))
+	s.send('pub '+name+' '+ch)
+	resp = s.recv(1024)
+	s.close()
+	print 'Enter message (max 2000 chars, end by EOF (Ctrl+D)'
+	message = sys.stdin.readlines()
+	req = 'publish ' + name + ' ' + ch + ' '
+	for q in message:
+		req = req + q
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	s.connect((HOST, PORT))
+	s.send(req.rstrip())
+	resp = s.recv(1024)
+	s.close()
+	if resp == 'Published!':
+		print '\033[92m' + resp + '\033[0m'
+	else:
+		print '\033[91m' + resp + '\033[0m'
 
 def subscribe():
 	a=1
