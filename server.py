@@ -107,10 +107,10 @@ def process_request(req, ip):
 			text = req[ind+1:]
 		if r != 'ch':
 			if check_id(ch_id)==0:
-				return 'Channel ID should have small letters/numbers only'
+				return 'Channel name should have small letters/numbers only'
 
 	if check_id(name) == 0:
-		return 'Name should have small letters/numbers only'
+		return 'Username should have small letters/numbers only'
 
 	if r == 'reg':
 		#Check if user already exists
