@@ -145,6 +145,10 @@ def process_request(req, ip):
 		elif r == 'sub':
 			try:
 				c = Channel.get(Channel.name == ch_id)
+			except Channel.DoesNotExist:
+				Channel.create(name = ch_id)
+				c = Channel.get(Channel.name == ch_id)
+			finally:
 				try:
 					subscription = ChannelSubscriber.get(ChannelSubscriber.ch_id == c, ChannelSubscriber.sub_id == u)
 					return 'User already subscribed'
@@ -153,8 +157,6 @@ def process_request(req, ip):
 					ChannelSubscriber.create(ch_id = c, sub_id = u, ts = c.num)
 					conn.sendall('Subscription added')
 					conn.close()
-			except Channel.DoesNotExist:
-				return 'Channel does not exist'
 		elif r == 'ch':
 			u.ip = new_ip
 			u.save()
