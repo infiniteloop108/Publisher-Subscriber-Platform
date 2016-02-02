@@ -86,13 +86,43 @@ def publish():
 		print '\033[91m' + resp + '\033[0m'
 
 def subscribe():
-	a=1
+	ch = raw_input('Enter Channel Name: ')
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	s.connect((HOST, PORT))
+	s.send('sub '+name+' '+ch)
+	resp = s.recv(1024)
+	s.close()
+	if resp == 'Subscription added':
+		print '\033[92m' + resp + '\033[0m'
+	else:
+		print '\033[91m' + resp + '\033[0m'
 
 def unsubscribe():
-	a=1
+	ch = raw_input('Enter Channel Name: ')
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	s.connect((HOST, PORT))
+	s.send('unsub '+name+' '+ch)
+	resp = s.recv(1024)
+	s.close()
+	if resp == 'Subscription removed':
+		print '\033[92m' + resp + '\033[0m'
+	else:
+		print '\033[91m' + resp + '\033[0m'
 
 def change():
-	a=1
+	ch = raw_input('Enter New IP: ')
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	s.connect((HOST, PORT))
+	s.send('ch '+name+' '+ch)
+	resp = s.recv(1024)
+	s.close()
+	if resp == 'IP changed':
+		print '\033[92m' + resp + '\033[0m'
+		print 'Now login from new IP'
+		print '\033[94m' + 'Goodbye!' + '\033[0m'
+		sys.exit(0)
+	else:
+		print '\033[91m' + resp + '\033[0m'
 
 while 1:
 	cmd = raw_input('Enter Command: ')
