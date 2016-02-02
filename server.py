@@ -4,8 +4,12 @@ import sys
 from database import *
 from thread import *
 
-HOST = 'localhost'
-PORT = 6042
+if len(sys.argv) != 3:
+	print 'Usage python server.py IP PORT'
+	sys.exit(0)
+
+HOST = sys.argv[1]
+PORT = int(sys.argv[2])
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -194,7 +198,6 @@ def process_request(req, ip):
 	return ''
 
 def client_thread(conn, addr):
-	conn.send('Welcome to Pub/Sub\n')
 	req = conn.recv(2048)
 	req = req.rstrip()
 	print 'Request ' + req + ' from ' + addr[0]
