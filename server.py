@@ -56,7 +56,7 @@ def update_user(name):
 				#Send feed with sid = ts
 				f = Feed.get(Feed.ch_id == c, Feed.sid == ts)
 				try:
-					conn.sendall('Feed\nChannel:'+c.name+'\nPublisher:'+f.pub_id.username+'\ntext:'+f.text+'\n')
+					conn.sendall('Channel:'+c.name+'\nPublisher:'+f.pub_id.username+'\ntext:'+f.text+'\n')
 					resp = conn.recv(1024)
 					resp = resp.rstrip()
 					if(resp == 'Success'):
