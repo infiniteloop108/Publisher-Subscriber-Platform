@@ -3,7 +3,7 @@ import socket
 from thread import *
 
 if len(sys.argv) != 4:
-	print 'Usage python client.py username server_ip server_port'
+	print '\033[91m' + 'Usage python client.py username server_ip server_port' + '\033[0m'
 	sys.exit(0)
 
 HOST = sys.argv[2]
@@ -21,7 +21,7 @@ if resp != 'Successfully Registered':
 	s.send('pub '+name+' trych')
 	resp = s.recv(1024)
 	if 'IP' in resp:
-		print 'Use the client from the IP you registered'
+		print '\033[91m' + 'Use the client from the IP you registered' + '\033[0m'
 		s.close()
 		sys.exit(0)
 s.close()
