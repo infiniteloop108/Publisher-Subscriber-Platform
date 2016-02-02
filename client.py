@@ -3,7 +3,7 @@ import socket
 from thread import *
 
 if len(sys.argv) != 4:
-	print 'Usage python client.py name server_ip server_host'
+	print 'Usage python client.py username server_ip server_port'
 	sys.exit(0)
 
 HOST = sys.argv[2]
